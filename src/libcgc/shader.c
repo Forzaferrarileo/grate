@@ -760,6 +760,28 @@ static void fragment_sfu_disasm(uint32_t *words)
 	instruction_free(inst);
 }
 
+static void fragment_tex_disasm(uint32_t *words)
+{
+	int op;
+	struct instruction *inst;
+	char buf[512], *str = buf;
+
+	inst = instruction_create_from_words(words, 1);
+
+	op = instruction_get_bit(inst, 10);
+	if (op)
+		pr("tex");
+
+	printf("     ");
+
+	instruction_print_raw(inst);
+	instruction_print_unknown(inst);
+
+	printf("    %s\n", buf);
+
+	instruction_free(inst);
+}
+
 static const char * offset_name(uint32_t offset)
 {
 	switch (offset) {
@@ -776,8 +798,8 @@ static const char * offset_name(uint32_t offset)
 static void fragment_shader_disassemble(uint32_t *words, size_t length)
 {
 	int i, j;
-	uint32_t *sfu = NULL, *alu = NULL;
-	int sfu_length = 0, alu_length = 0;
+	uint32_t *sfu = NULL, *alu = NULL, *tex;
+	int sfu_length = 0, alu_length = 0, tex_length = 0;
 	uint32_t *sfu_sched = NULL, *alu_sched = NULL;
 	int sfu_sched_length = 0, alu_sched_length = 0;
 
@@ -786,6 +808,12 @@ static void fragment_shader_disassemble(uint32_t *words, size_t length)
 		printf("SFU:");
 		if (t) printf("%03d", t);
 		fragment_sfu_disasm(sfu + (idx * 2));
+	}
+
+	void print_tex(int idx)
+	{
+		printf("TEX: ---");
+		fragment_tex_disasm(tex + idx);
 	}
 
 	void print_alu(int idx, int t)
@@ -848,6 +876,14 @@ printf("----------------------------------------------------------------\n");
 			for (j = 0; j < sfu_length; j++)
 				print_sfu(j, 0);
 
+			break;
+		case 0x701:
+			tex = words + i;
+			tex_length = count;
+
+			printf("      tex instructions:\n");
+			for (j = 0; j < tex_length; ++j)
+				print_tex(j);
 			break;
 		case 0x801:
 			alu_sched = words + i;
