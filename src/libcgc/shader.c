@@ -774,11 +774,14 @@ static void fragment_tex_disasm(uint32_t *words)
 		int samp = instruction_extract(inst, 0, 3);
 		pr(bias ? "txb" : "tex");
 		pr(" s%d", samp);
-	}
+	} else
+		pr("nop");
 
 	printf("     ");
 
+	printf("         ");
 	instruction_print_raw(inst);
+	printf("         ");
 	instruction_print_unknown(inst);
 
 	printf("    %s\n", buf);
@@ -814,9 +817,10 @@ static void fragment_shader_disassemble(uint32_t *words, size_t length)
 		fragment_sfu_disasm(sfu + (idx * 2));
 	}
 
-	void print_tex(int idx)
+	void print_tex(int idx, int  t)
 	{
-		printf("TEX: ---");
+		printf("TEX:");
+		if (t) printf("%03d", t);
 		fragment_tex_disasm(tex + idx);
 	}
 
@@ -887,7 +891,7 @@ printf("----------------------------------------------------------------\n");
 
 			printf("      tex instructions:\n");
 			for (j = 0; j < tex_length; ++j)
-				print_tex(j);
+				print_tex(j, 0);
 			break;
 		case 0x801:
 			alu_sched = words + i;
@@ -937,17 +941,19 @@ printf("----------------------------------------------------------------\n");
  *      0x00000011
  */
 		assert(alu_sched_length == sfu_sched_length);  /* I think! */
+		assert(alu_sched_length == tex_length);  /* I think! */
 
 		for (i = 0; i < alu_sched_length; i++) {
 			if (sfu_sched[i] && alu_sched[i]) {
 				/* I guess, if same value for sfu and alu, that sfu wins? */
-				print_sfu(si++, sfu_sched[i]);
+				print_sfu(si, sfu_sched[i]);
 				print_alu(ai++, alu_sched[i]);
 			} else if (sfu_sched[i]) {
-				print_sfu(si++, sfu_sched[i]);
+				print_sfu(si, sfu_sched[i]);
 			} else if (alu_sched[i]) {
 				print_alu(ai++, alu_sched[i]);
 			}
+			print_tex(i, i + 1);
 		}
 	}
 }
