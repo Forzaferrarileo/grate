@@ -771,7 +771,9 @@ static void fragment_tex_disasm(uint32_t *words)
 	op = instruction_get_bit(inst, 10);
 	if (op) {
 		int bias = instruction_get_bit(inst, 12);
+		int samp = instruction_extract(inst, 0, 3);
 		pr(bias ? "txb" : "tex");
+		pr(" s%d", samp);
 	}
 
 	printf("     ");
