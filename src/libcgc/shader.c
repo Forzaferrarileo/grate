@@ -764,7 +764,7 @@ static void fragment_tex_disasm(uint32_t *words)
 {
 	int op;
 	struct instruction *inst;
-	char buf[512], *str = buf;
+	char buf[512] = { 0 }, *str = buf;
 
 	inst = instruction_create_from_words(words, 1);
 
