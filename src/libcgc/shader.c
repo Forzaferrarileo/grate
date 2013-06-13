@@ -944,19 +944,13 @@ printf("----------------------------------------------------------------\n");
 		assert(alu_sched_length == tex_length);  /* I think! */
 
 		for (i = 0; i < alu_sched_length; i++) {
-			if (sfu_sched[i] && alu_sched[i]) {
-				/* I guess, if same value for sfu and alu, that sfu wins? */
-				print_sfu(si, sfu_sched[i]);
-				print_tex(i, i + 1);
+			if (sfu_sched[i])
+				print_sfu(si++, sfu_sched[i]);
+
+			print_tex(i, i + 1);
+
+			if (alu_sched[i])
 				print_alu(ai++, alu_sched[i]);
-			} else if (sfu_sched[i]) {
-				print_sfu(si, sfu_sched[i]);
-				print_tex(i, i + 1);
-			} else if (alu_sched[i]) {
-				print_tex(i, i + 1);
-				print_alu(ai++, alu_sched[i]);
-			} else
-				print_tex(i, i + 1);
 		}
 	}
 }
