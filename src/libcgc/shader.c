@@ -614,34 +614,22 @@ static int fragment_alu_disasm(uint32_t *words)
 		scale = instruction_get_bit(inst, offset);
 		pr(", ");
 
-		if (instruction_get_bit(inst, offset + 4)) {
-			pr("unk4 ");
-			assert(0);
-		}
-
 		pr("%s%s", neg ? "-" : "", abs ? "abs(" : "");
 		switch (type) {
 		case 0:
 			/* general-purpose register */
 			reg = instruction_extract(inst, offset + 5, offset + 10);
 			if (reg >= 48) {
-				if (reg == 48)
-					pr("d0");
-				else if (reg == 50)
-					pr("d1");
-				else if (reg == 52)
-					pr("d2");
-				else if (reg == 54)
-					pr("d3");
-				else if (reg >= 56 && reg < 62) {
+				if (reg < 56) {
+					assert(x10 || !(reg & 1));
+					pr("d%d.%s", (reg - 48) >> 1, x10 ? (reg & 1 ? "h" : "l") : "hl");
+				} else if (reg < 62) {
 					pr("ec%d", reg - 56);
 					embedded_constant_used = 1;
 				} else if (reg == 62)
 					pr("#0");
-				else if (reg == 63)
-					pr("#1");
 				else
-					assert(0);
+					pr("#1");
 			} else {
 				assert(x10 || !(reg & 1));
 				if (!gpr_written[reg >> 1])
