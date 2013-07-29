@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import random
 import sys
-import re 
+import re
 
 def get_vector_type_and_size(type):
 	match = re.match("([bi]?)vec([2-4])", type)
